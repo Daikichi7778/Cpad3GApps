@@ -1,0 +1,52 @@
+umask 022
+OUTFD=$2
+ZIPFILE=$3
+mount /data 2>/dev/null
+. /data/adb/magisk/util_functions.sh
+
+echo ""
+
+copy_apk() {
+    su -c cp -f /data/adb/modules_update/Cpad3GApps/system/priv-app/$1/$1.apk /data/local/tmp/$1.apk
+}
+
+permission_directory() {
+    chmod 755 $1
+}
+permission_apk() {
+    chmod 644 $1
+}
+
+echo "- Fixing System Settings..."
+
+su -c settings put install_non_market_apps 1
+
+install_module
+echo ""
+
+su -c am force-stop jp.co.benesse.dcha.dchaservice
+
+echo "- Installing Cpad3GApps..."
+
+copy_apk
+
+sleep 0.2
+
+echo -e "- Setup Permissions..."
+
+permission_apk /system/priv-app/GmsCore/GmsCore.apk 
+
+permission_apk /system/priv-app/GoogleServicesFramework/GoogleServicesFramework.apk
+
+permission_apk /system/priv-app/Phonesky/Phonesky.apk
+
+
+permission_directory /system/priv-app/GmsCore
+
+permission_directory /system/priv-app/GoogleServicesFramework
+
+permission_directory /system/priv-app/Phonesky
+
+echo "- Install Success."
+
+exit 0
